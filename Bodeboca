@@ -1,0 +1,469 @@
+' With this code you will be able to download all the data from the web www.bodeboca.com
+
+
+Sub Bodeboca()
+
+    'INDICES
+    Call Inicio
+    Call Limpio
+    IndiceNombre = 2
+    IndiceVariedad = 6
+    IndicePuntuacionWE = 9
+    IndicePuntuacionPenin = 10
+    IndicePuntuacionParker = 11
+    IndicePuntuacionDunnuck = 12
+    IndicePuntuacionSuckling = 13
+    IndicePrecio = 3
+    IndiceDescripcion = 16
+    IndiceBodega = 7
+    IndiceDO = 8
+    IndiceTipo = 4
+    IndiceAnada = 5
+    IndiceEnvejecimiento = 14
+    IndiceEmbotellado = 15
+
+    Fila = 14
+    
+    'On Error Resume Next
+
+    'Definimos las variables  de descarga de la página web
+    Dim HTMLDoc As New MSHTML.HTMLDocument
+    Dim HTMLDocEnlace As New MSHTML.HTMLDocument
+    
+    Dim XMLReq As New MSXML2.XMLHTTP60
+    Dim XMLReqEnlace As New MSXML2.XMLHTTP60
+    
+    'Variables para la búsqueda de información
+    Dim Wine As MSHTML.IHTMLElement
+    Dim Wines As MSHTML.IHTMLElementCollection
+    
+    Dim AAA As MSHTML.IHTMLElement 'Collection
+    
+    'Obtenemos la página web de la hoja Excel
+    Dim Pagina As String
+    PaginaOriginal = Cells(3, 2)
+    
+    PosicionPagina = InStr(PaginaOriginal, "page=")
+    PosicionBusqueda = InStr(PaginaOriginal, "search?")
+    NumeroPagina = 1
+    
+    If PosicionPagina > 0 Then
+        PaginaIni = Left(PaginaOriginal, PosicionPagina + 4)
+        PaginaFin = Right(PaginaOriginal, Len(PaginaOriginal) - Len(PaginaIni) - 1)
+    ElseIf PosicionBusqueda > 0 Then
+        PaginaIni = Left(PaginaOriginal, PosicionBusqueda + 6) & "page="
+        PaginaFin = "&" & Right(PaginaOriginal, Len(PaginaOriginal) - Len(PaginaIni) + 5)
+    Else
+        PaginaIni = PaginaOriginal & "?page="
+        PaginaFin = ""
+    End If
+    
+   
+    
+    
+    Numero = 0
+    
+    
+    For NumeroPagina = 1 To 200
+    
+        DoEvents
+        
+        Application.StatusBar = "Cargando página " & NumeroPagina
+        
+        Pagina = PaginaIni & NumeroPagina & PaginaFin
+        
+        'Abrimos la página web
+        XMLReq.Open "GET", Pagina, False
+        XMLReq.send
+
+        'Chequeamos que todo ha ido bien
+        If XMLReq.Status <> 200 Then '200=todo OK
+            MsgBox "Ha ocurrido un error" & vbNewLine & XMLPage.Status & " - " & XMLPage.statusText
+            Exit Sub
+        End If
+        
+        'Obtener el código de la página web
+        HTMLDoc.body.innerHTML = XMLReq.responseText
+        
+        'Todos los hiperlinks están en la clase "wineblock-inner"
+        Set Wines = HTMLDoc.getElementsByClassName("wineblock-inner")
+        
+        'Comprobación que se comenta
+        'Debug.Print Wines.Length
+    
+        
+        Dim Enlace As String
+        Dim Hipervinculo(10000) As String
+        
+        Longitud = Wines.Length
+        
+        If Longitud = 0 Then
+            Exit For
+        End If
+        
+        'Hacemos un bucle for para extraer el hipervínculo
+        For Each Wine In Wines
+        '"getElementsByTagName" solo funciona en Elementos
+            Set AAA = Wine.getElementsByTagName("a")(0)
+            Enlace = AAA.getAttribute("href")
+            If Left(Enlace, 7) = "about:/" Then
+                Enlace = Right(Enlace, Len(Enlace) - 7)
+            End If
+            Hipervinculo(Numero) = "https://www.bodeboca.com/" & Enlace
+            'Debug.Print AAA.getAttribute("href")
+            'Debug.Print Wine.getElementsByattribute("a")
+            Numero = Numero + 1
+        Next Wine
+        
+        If Longitud <> 30 Then
+            Exit For
+        End If
+        
+    Next NumeroPagina
+    
+    
+    'Stop
+    
+    For j = 0 To Numero - 1
+        
+        DoEvents
+        
+        Application.StatusBar = "Cargando vino " & j + 1 & " de " & Numero
+        'DENTRO DE LA PÁGINA WEB OBJETIVO
+        
+        'Variables para la búsqueda de información
+        'Nombre
+        Dim Nombre As String
+        
+        'Variedad
+        Dim Variedad As String
+        
+        'Puntuaciones
+        Dim PuntuacionesColeccion As MSHTML.IHTMLElementCollection
+        Dim PuntuacionesElemento As MSHTML.IHTMLElement
+    
+        Dim Cuadros As MSHTML.IHTMLElementCollection
+        Dim Cuadro As MSHTML.IHTMLElement
+        
+        
+        Dim NombrePuntuacionElemento As MSHTML.IHTMLElement
+        Dim NombrePuntuacionColeccion As MSHTML.IHTMLElementCollection
+        Dim NombrePuntuacion As String
+    
+        'Precio
+        Dim PrecioColeccion As MSHTML.IHTMLElementCollection
+        Dim PrecioElemento As MSHTML.IHTMLElement
+        Dim Precio As String
+        
+        'Descripcion
+        Dim DescripcionColeccion As MSHTML.IHTMLElementCollection
+        Dim DescripcionElemento As MSHTML.IHTMLElement
+        Dim Descripcion As String
+        
+        'Bodega
+        Dim Bodega As String
+        
+        'D.O.
+        Dim DOO As String
+        
+        'Tipo
+        Dim Tipo As String
+        
+        'Añada
+        Dim Anada As String
+        
+        'Envejecimiento
+        Dim EnvejeciminetoColeccion As MSHTML.IHTMLElementCollection
+        Dim EnvejeciminetoElemento As MSHTML.IHTMLElement
+        Dim Envejecimineto As String
+        
+        'Embotellado
+        Dim EmbotelladooColeccion As MSHTML.IHTMLElementCollection
+        Dim EmbotelladoElemento As MSHTML.IHTMLElement
+        Dim Embotellado As String
+        
+        
+        
+        
+        
+        'Para cada enlace abrimos la página web
+        XMLReqEnlace.Open "GET", Hipervinculo(j), False
+        XMLReqEnlace.send
+        
+        'Chequeamos que todo ha ido bien
+        If XMLReqEnlace.Status = 200 Then '200=todo OK
+                'MsgBox "Ha ocurrido un error" & vbNewLine & XMLPage.Status & " - " & XMLPage.statusText
+                'Exit Sub
+            
+            
+            'Obtener el código de la página web
+            HTMLDocEnlace.body.innerHTML = XMLReqEnlace.responseText
+            
+            
+            'OBTENCIÓN DE DATOS
+            
+            'Ficha técnica
+            Dim FichaVector() As String
+            ReDim FichaVector(500) As String 'Borramos los resultados anteriores
+            
+            Nombre = "-"
+            Variedad = "-"
+            Bodega = "-"
+            DOO = "-"
+            Tipo = "-"
+            Anada = "-"
+            
+            Set NombreColeccion = HTMLDocEnlace.getElementsByClassName("info three-column-wrapper product-details")
+            Set NombreElemento = NombreColeccion(0)
+            Ficha = NombreElemento.innerText
+            FichaVector() = Split(Ficha, vbCrLf)
+            
+            Saltar = NombreColeccion.Length
+            
+            If Saltar <> 0 Then
+            
+                For i = 0 To UBound(FichaVector())
+                    If FichaVector(i) = "La bodega:" Then
+                        Bodega = FichaVector(i + 1)
+                    ElseIf FichaVector(i) = "Marca:" Then
+                        Nombre = FichaVector(i + 1)
+                    ElseIf FichaVector(i) = "D.O.:" Then
+                        DOO = FichaVector(i + 1)
+                    ElseIf FichaVector(i) = "Tipo:" Then
+                        Tipo = FichaVector(i + 1)
+                    ElseIf FichaVector(i) = "Añada:" Then
+                        Anada = FichaVector(i + 1)
+                    ElseIf FichaVector(i) = "Variedad:" Then
+                        Variedad = FichaVector(i + 1)
+                    End If
+                Next i
+            End If
+            
+            Cells(Fila, IndiceNombre) = Nombre
+            Cells(Fila, IndiceVariedad) = Variedad
+            Cells(Fila, IndiceBodega) = Bodega
+            Cells(Fila, IndiceDO) = DOO
+            Cells(Fila, IndiceTipo) = Tipo
+            Cells(Fila, IndiceAnada) = Anada
+            
+            
+            'Puntuaciones
+            PuntuacionWE = "-"
+            PuntuacionPenin = "-"
+            PuntuacionParker = "-"
+            PuntuacionDunnuck = "-"
+            PuntuacionSuckling = "-"
+            
+            Dim Puntuaciones As String
+            
+            Dim PuntuacionesVector() As String
+            ReDim PuntuacionesVector(500) As String
+            
+            Set Cuadros = HTMLDocEnlace.getElementsByClassName("icons mobile-padding")
+            Set Cuadro = Cuadros(0)
+            Saltar = Cuadros.Length
+            If Saltar <> 0 Then
+                Puntuaciones = Cuadro.innerText
+                PuntuacionesVector() = Split(Puntuaciones, vbCrLf)
+            
+                For i = 0 To UBound(PuntuacionesVector())
+                    If PuntuacionesVector(i) = "WE" Then
+                        PuntuacionWE = PuntuacionesVector(i - 1)
+                        Position = InStr(PuntuacionWE, "-")
+                        If Position = 0 Then
+                            PuntuacionWE = PuntuacionWE * 1
+                        End If
+                    ElseIf PuntuacionesVector(i) = "Parker" Then
+                        PuntuacionParker = PuntuacionesVector(i - 1)
+                        Position = InStr(PuntuacionParker, "-")
+                        If Position = 0 Then
+                            PuntuacionParker = PuntuacionParker * 1
+                        End If
+                    ElseIf PuntuacionesVector(i) = "Peñín" Then
+                        PuntuacionPenin = PuntuacionesVector(i - 1)
+                        Position = InStr(PuntuacionPenin, "-")
+                        If Position = 0 Then
+                            PuntuacionPenin = PuntuacionPenin * 1
+                        End If
+                    ElseIf PuntuacionesVector(i) = "Dunnuck" Then
+                        PuntuacionDunnuck = PuntuacionesVector(i - 1)
+                        Position = InStr(PuntuacionDunnuck, "-")
+                        If Position = 0 Then
+                            PuntuacionDunnuck = PuntuacionDunnuck * 1
+                        End If
+                    ElseIf PuntuacionesVector(i) = "Suckling" Then
+                        PuntuacionSuckling = PuntuacionesVector(i - 1)
+                        Position = InStr(PuntuacionSuckling, "-")
+                        If Position = 0 Then
+                            PuntuacionSuckling = PuntuacionSuckling * 1
+                        End If
+                    End If
+                Next i
+                
+            End If
+            
+            Cells(Fila, IndicePuntuacionPenin) = PuntuacionPenin
+            Cells(Fila, IndicePuntuacionParker) = PuntuacionParker
+            Cells(Fila, IndicePuntuacionWE) = PuntuacionWE
+            Cells(Fila, IndicePuntuacionDunnuck) = PuntuacionParker
+            Cells(Fila, IndicePuntuacionSuckling) = PuntuacionSuckling
+            
+            
+            'Precio
+            Precio = "-"
+            Set PrecioColeccion = HTMLDocEnlace.getElementsByClassName("uc-price")
+            Set PrecioElemento = PrecioColeccion(0)
+            Precio = PrecioElemento.innerText
+            Precio = Left(Precio, Len(Precio) - 2)
+            Cells(Fila, IndicePrecio) = Precio * 1
+            Cells(Fila, IndicePrecio) = Cells(Fila, IndicePrecio) * 1
+    
+            
+            
+            'Ficha preparación
+            Dim PreparacionVector() As String
+            ReDim PreparacionVector(500) As String 'Borramos los resultados anteriores
+            
+            Descripcion = "-"
+            Envejecimiento = "-"
+            Embotellado = "-"
+            
+            Set DescripcionColeccion = HTMLDocEnlace.getElementsByClassName("info two-column-wrapper vineyard-and-preparation")
+            Set DescripcionElemento = DescripcionColeccion(0)
+            
+            Saltar = DescripcionColeccion.Length
+            
+            If Saltar <> 0 Then
+                Preparacion = DescripcionElemento.innerText
+                PreparacionVector() = Split(Preparacion, vbCrLf)
+                
+                For i = 0 To UBound(PreparacionVector())
+                    If PreparacionVector(i) = "Descripción:" Then
+                        Descripcion = PreparacionVector(i + 1)
+                    ElseIf PreparacionVector(i) = "Envejecimiento:" Then
+                        Envejecimiento = PreparacionVector(i + 1)
+                    ElseIf PreparacionVector(i) = "Embotellado:" Then
+                        Embotellado = PreparacionVector(i + 1)
+                    End If
+                Next i
+            End If
+            
+            Cells(Fila, IndiceDescripcion) = Descripcion
+            Cells(Fila, IndiceEnvejecimiento) = Envejecimiento
+            Cells(Fila, IndiceEmbotellado) = Embotellado
+                
+            Fila = Fila + 1
+        End If
+    Next j
+    
+    'Darle formato numérico a una columna
+
+    'Range(Cells(6, 3), Cells(6000, 3)).NumberFormat = "Number"
+    Range(Cells(5, 2), Cells(Fila - 1, 16)).Select
+    Selection.Borders(xlEdgeLeft).LineStyle = xlContinuous
+    Selection.Borders(xlEdgeBottom).LineStyle = xlContinuous
+    Selection.Borders(xlEdgeTop).LineStyle = xlContinuous
+    Selection.Borders(xlEdgeRight).LineStyle = xlContinuous
+    Selection.Borders(xlInsideVertical).LineStyle = xlContinuous
+    Selection.Borders(xlInsideHorizontal).LineStyle = xlContinuous
+
+    Call Fin
+End Sub
+
+
+
+
+Sub Inicio()
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    Application.Calculation = xlManual
+    Application.EnableEvents = False
+End Sub
+
+Sub Fin()
+    Application.ScreenUpdating = True
+    Application.DisplayAlerts = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.EnableEvents = True
+End Sub
+
+
+
+
+Sub Hiper()
+    Archivo = Application.InputBox("Introduzca el hipervínculo de Bodeboca:")
+    If Archivo = False Then
+        Exit Sub
+    End If
+    Cells(3, 2) = Archivo
+End Sub
+
+
+
+
+Sub Imprimir()
+
+    PrimeraFila = 5
+    UltimaFila = Cells(Rows.Count, 2).End(xlUp).Row
+    UltimaFilaEncabezado = 13
+    PrimeraColumna = 2
+    UltimaColumna = 13
+    
+
+    ActiveSheet.PageSetup.PrintArea = Range(Cells(PrimeraFila, PrimeraColumna), Cells(UltimaFila, UltimaColumna))
+    With ActiveSheet.PageSetup
+        .PrintTitleRows = "$" & PrimeraFila & ":$" & UltimaFilaEncabezado
+        .CenterFooter = "&P"
+        .LeftMargin = Application.InchesToPoints(0.7)
+        .RightMargin = Application.InchesToPoints(0.7)
+        .TopMargin = Application.InchesToPoints(0.75)
+        .BottomMargin = Application.InchesToPoints(0.75)
+        .HeaderMargin = Application.InchesToPoints(0.3)
+        .FooterMargin = Application.InchesToPoints(0.3)
+        .PrintHeadings = False
+        .PrintGridlines = False
+        .PrintComments = xlPrintNoComments
+        .PrintQuality = 600
+        .CenterHorizontally = False
+        .CenterVertically = False
+        .Orientation = xlPortrait
+        .Draft = False
+        .PaperSize = xlPaperA4
+        .FirstPageNumber = xlAutomatic
+        .Order = xlDownThenOver
+        .BlackAndWhite = False
+        .Zoom = False
+        .FitToPagesWide = 1
+        .PrintErrors = xlPrintErrorsDisplayed
+        .OddAndEvenPagesHeaderFooter = False
+        .DifferentFirstPageHeaderFooter = False
+        .ScaleWithDocHeaderFooter = True
+        .AlignMarginsHeaderFooter = True
+    End With
+
+    Application.PrintCommunication = True
+End Sub
+
+
+
+
+Sub Limpio()
+    Call Inicio
+    Range(Cells(14, 1), Cells(60000, 1000)).ClearContents
+    Range(Cells(5, 2), Cells(60000, 16)).Select
+    Selection.Borders(xlEdgeLeft).LineStyle = xlNone
+    Selection.Borders(xlEdgeBottom).LineStyle = xlNone
+    Selection.Borders(xlEdgeTop).LineStyle = xlNone
+    Selection.Borders(xlEdgeRight).LineStyle = xlNone
+    Selection.Borders(xlInsideVertical).LineStyle = xlNone
+    Selection.Borders(xlInsideHorizontal).LineStyle = xlNone
+    'xlNone
+    Range(Cells(14, 2), Cells(14, 16)).Select
+    Selection.Borders(xlEdgeLeft).LineStyle = xlContinuous
+    Selection.Borders(xlEdgeBottom).LineStyle = xlContinuous
+    Selection.Borders(xlEdgeTop).LineStyle = xlContinuous
+    Selection.Borders(xlEdgeRight).LineStyle = xlContinuous
+    Selection.Borders(xlInsideVertical).LineStyle = xlContinuous
+    Selection.Borders(xlInsideHorizontal).LineStyle = xlContinuous
+    Call Fin
+End Sub
