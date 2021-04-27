@@ -1,0 +1,98 @@
+Sub sudoku()
+
+For numero = 1 To 9
+
+    For fila = 1 To 9
+        For columna = 1 To 9
+            Cells(fila + 10, columna) = 1
+        Next columna
+    Next fila
+    
+    For fila = 1 To 9
+        For columna = 1 To 9
+            If Cells(fila, columna) = numero Then
+                For x = 3 To 9 Step 3 'esto es para hacer la submatrices
+                    For y = 3 To 9 Step 3
+                        If fila <= x And fila >= x - 2 And columna >= y - 2 And columna <= y Then
+                            For subfila = x - 2 To x
+                                For subcolumna = y - 2 To y
+                                    Cells(subfila + 10, subcolumna) = 0
+                                Next subcolumna
+                            Next subfila
+                        End If
+                    Next y
+                Next x
+                
+                For n = 1 To 9 'completar toda la fila o columna
+                    Cells(fila + 10, n) = 0
+                    Cells(n + 10, columna) = 0
+                    
+                Next n
+                
+            ElseIf Trim(Cells(fila, columna)) <> "" Then ' los que esten ocupados
+                Cells(fila + 10, columna) = 0
+            End If
+        Next columna
+    Next fila
+    
+    
+    
+    For fila = 1 To 9
+        interruptor = 0
+        For columna = 1 To 9
+            If Cells(fila + 10, columna) = 1 Then
+                interruptor = interruptor + 1
+            End If
+        Next columna
+        If interruptor = 1 Then
+            For columna = 1 To 9
+                If Cells(fila + 10, columna) = 1 Then
+                    Cells(fila, columna) = numero
+                End If
+            Next columna
+        End If
+    Next fila
+    
+    For columna = 1 To 9
+        interruptor = 0
+        For fila = 1 To 9
+            If Cells(fila + 10, columna) = 1 Then
+                interruptor = interruptor + 1
+            End If
+        Next fila
+        If interruptor = 1 Then
+            For fila = 1 To 9
+                If Cells(fila + 10, columna) = 1 Then
+                    Cells(fila, columna) = numero
+                End If
+            Next fila
+        End If
+    Next columna
+
+    For fila = 1 To 9
+            For columna = 1 To 9
+                If Cells(fila + 10, columna) = 1 Then
+                    For x = 3 To 9 Step 3 'esto es para hacer la submatrices
+                        For y = 3 To 9 Step 3
+                            If fila <= x And fila >= x - 2 And columna >= y - 2 And columna <= y Then
+                                interruptor = 0
+                                For subfila = x - 2 To x
+                                    For subcolumna = y - 2 To y
+                                        If Cells(subfila + 10, subcolumna) = 1 Then
+                                            interruptor = interruptor + 1
+                                        End If
+                                    Next subcolumna
+                                Next subfila
+                                If interruptor = 1 Then
+                                    Cells(fila, columna) = numero
+                                End If
+                            End If
+                        Next y
+                    Next x
+                End If
+            Next columna
+    Next fila
+
+Next numero
+
+End Sub
