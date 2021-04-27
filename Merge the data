@@ -1,0 +1,70 @@
+'This file merge sheets in different Excel files.
+
+Sub Directory()
+
+    ActiveSheet.Unprotect "Initec2020"
+    MsgBox "Select a file to import"
+    Archivo = Application.GetOpenFilename
+    If Archivo = False Then
+        Exit Sub
+    End If
+
+    Posicion = InStrRev(Archivo, "\")
+    Cells(29, 2) = Left(Archivo, Posicion)
+    ActiveSheet.Protect Password:="Initec2020", UserInterfaceOnly:=True
+    
+End Sub
+
+
+Public Sub MergeTheData()
+Application.ScreenUpdating = False
+Application.DisplayAlerts = False
+    'Nota: Si la versión de Excel es anterior a la 2010 quizás haya que establecer una referencia a la librería _
+
+     'Microsoft Scripting Runtime' (desde Herramientas->Referencias, estando en el editor VBA)
+    Original = ActiveWorkbook.Name
+
+    Dim fso As Object, fCarpeta As Object, tmpCarpeta As Object
+
+    Dim Fichero As Object, tmpFichero As Object
+
+    Dim strRutaInicial As String
+
+
+    strRutaInicial = Cells(29, 2) 'Ruta que se procesará
+
+
+    Set fso = CreateObject("Scripting.FileSystemObject")
+
+    Set fCarpeta = fso.GetFolder(strRutaInicial)
+    
+    Conteo = Sheets.Count
+
+    
+    For Each tmpFichero In fCarpeta.Files
+
+        Workbooks.Open tmpFichero.Path
+        
+        NombreReal = ActiveWorkbook.Name
+        Conteo2 = Sheets.Count
+        Sheets.Select
+        
+        Sheets.Copy After:=Workbooks(Original).Sheets(Conteo)
+        Conteo = Sheets.Count
+        
+        Posicion = InStr(NombreReal, ".")
+        Nombre = Left(NombreReal, Posicion - 1)
+        
+        For i = Conteo - Conteo2 + 1 To Conteo
+            Sheets(i).Name = Sheets(i).Name + " (" + Nombre + ")"
+        Next i
+        
+        Workbooks(NombreReal).Close SaveChanges:=False
+        
+    Dim DataObj As New MSForms.DataObject 'empty the clipboard
+       DataObj.SetText ""
+       DataObj.PutInClipboard
+
+    Next tmpFichero
+
+End Sub
